@@ -11,6 +11,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,14 +43,16 @@ class LightningTalkSchedulerServiceTest {
     public void shouldTestBody_forPosEntity() {
         when(restTemplateMock.postForEntity(anyString(), any(HttpEntity.class), eq(String.class))).thenReturn(ResponseEntity.accepted().build());
 
-        lightningTalkSchedulerService.schedule();
+        LocalDateTime startDate = LocalDateTime.of(2020, 03, 25, 15, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(2020, 03, 25, 15, 30, 0);
+        lightningTalkSchedulerService.schedule("Refatorando seu código", startDate, endDate);
 
         ArgumentCaptor<HttpEntity> requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
 
         verify(restTemplateMock).postForEntity(eq(URL_SEND_MAIL), requestCaptor.capture(), any());
         HttpEntity capture = requestCaptor.getValue();
 
-        TransmissionEmailRequestBody expectedRequestBody = new TransmissionEmailRequestBody("ivo.batistela@db1.com.br", "Meet for lunch?", "The new cafeteria is open.");
+        TransmissionEmailRequestBody expectedRequestBody = new TransmissionEmailRequestBody("ivo.batistela@db1.com.br", "Refatorando seu código", "Solicito a transmissão da Lightning Talk \"Refatorando seu código\", que ocorrerá no dia 25/03/2020 das 15:00 até 15:30");
         Object body = capture.getBody();
         assertNotNull(body);
         assertEquals(expectedRequestBody, body);

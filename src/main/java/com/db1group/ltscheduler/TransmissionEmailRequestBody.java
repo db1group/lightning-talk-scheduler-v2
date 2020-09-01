@@ -47,6 +47,12 @@ public class TransmissionEmailRequestBody implements Serializable {
         return Objects.hash(message);
     }
 
+    @Override
+    public String toString() {
+        String messagePattern = "TransmissionEmailRequestBody{ recipient: %s; subject: %s; content: %s; }";
+        return String.format(messagePattern, message.getRecipient(), message.getSubject(), message.getBody().getContent());
+    }
+
     private class Message implements Serializable {
 
         private String subject;
@@ -61,6 +67,10 @@ public class TransmissionEmailRequestBody implements Serializable {
 
             this.toRecipients = new ArrayList<>();
             this.toRecipients.add(new Recipient(recipient));
+        }
+
+        public String getRecipient() {
+            return this.toRecipients.get(0).getEmailAddress().getAddress();
         }
 
         public String getSubject() {
