@@ -1,9 +1,7 @@
 package com.db1group.ltscheduler;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,14 +9,16 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class LightningTalkSchedulerServiceTest {
-
 
     private static final String URL_SEND_MAIL = "https://graph.microsoft.com/v1.0/me/sendMail";
 
@@ -41,7 +41,9 @@ class LightningTalkSchedulerServiceTest {
     public void shouldTestBody_forPosEntity() {
         when(restTemplateMock.postForEntity(anyString(), any(HttpEntity.class), eq(String.class))).thenReturn(ResponseEntity.accepted().build());
 
-        lightningTalkSchedulerService.schedule();
+        LocalDateTime startDate = LocalDateTime.of(2020, 03, 25, 15, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(2020, 03, 25, 15, 30, 0);
+        lightningTalkSchedulerService.schedule("Refatorando seu código", startDate, endDate);
 
         ArgumentCaptor<HttpEntity> requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
 
@@ -56,10 +58,10 @@ class LightningTalkSchedulerServiceTest {
     private Object getExpectedBody() {
         return "{\n" +
                 "  \"message\": {\n" +
-                "    \"subject\": \"Meet for lunch?\",\n" +
+                "    \"subject\": \"Transmissão de Lightning Talk\",\n" +
                 "    \"body\": {\n" +
                 "      \"contentType\": \"Text\",\n" +
-                "      \"content\": \"The new cafeteria is open.\"\n" +
+                "      \"content\": \"Solicito a transmissão da Lightning Talk \"Refatorando seu código\", que ocorrerá no dia 25/03/2020 das 15:00 até 15:30\"\n" +
                 "    },\n" +
                 "    \"toRecipients\": [\n" +
                 "      {\n" +
