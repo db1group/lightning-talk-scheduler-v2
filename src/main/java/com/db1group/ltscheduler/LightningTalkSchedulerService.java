@@ -1,7 +1,6 @@
 package com.db1group.ltscheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,12 +16,9 @@ public class LightningTalkSchedulerService {
 
     private RestTemplate restTemplate;
 
-    private Environment environment;
-
     @Autowired
-    public LightningTalkSchedulerService(RestTemplate restTemplate, Environment environment) {
+    public LightningTalkSchedulerService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.environment = environment;
     }
 
     public boolean schedule() {
@@ -62,16 +58,12 @@ public class LightningTalkSchedulerService {
                 "    \"toRecipients\": [\n" +
                 "      {\n" +
                 "        \"emailAddress\": {\n" +
-                "          \"address\": \"ivo.batistela@db1.com.br\"\n" +
+                "          \"address\": \"helpdesk@db1.com.br\"\n" +
                 "        }\n" +
                 "      }\n" +
                 "    ]\n" +
                 "  },\n" +
                 "  \"saveToSentItems\": \"true\"\n" +
                 "}";
-    }
-
-    private String getBroadcastEmailAddress() {
-        return environment.getProperty("broadcast.email.address");
     }
 }

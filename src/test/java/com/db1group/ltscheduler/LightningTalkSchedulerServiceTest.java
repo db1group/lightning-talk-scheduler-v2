@@ -1,7 +1,5 @@
 package com.db1group.ltscheduler;
 
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -9,15 +7,11 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -71,7 +65,7 @@ class LightningTalkSchedulerServiceTest {
                 "    \"toRecipients\": [\n" +
                 "      {\n" +
                 "        \"emailAddress\": {\n" +
-                "          \"address\": \"ivo.batistela@db1.com.br\"\n" +
+                "          \"address\": \"helpdesk@db1.com.br\"\n" +
                 "        }\n" +
                 "      }\n" +
                 "    ]\n" +
@@ -79,7 +73,6 @@ class LightningTalkSchedulerServiceTest {
                 "  \"saveToSentItems\": \"true\"\n" +
                 "}";
     }
-
 
     @Test
     public void shouldSendTransmissionEmailToTheConfiguredAddress() {
@@ -99,6 +92,4 @@ class LightningTalkSchedulerServiceTest {
 
         assertTrue(String.valueOf(body).contains("helpdesk@db1.com.br"));
     }
-
-
 }
