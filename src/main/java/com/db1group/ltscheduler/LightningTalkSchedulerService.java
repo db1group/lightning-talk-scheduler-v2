@@ -1,6 +1,7 @@
 package com.db1group.ltscheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,10 +16,12 @@ import java.time.format.DateTimeFormatter;
 public class LightningTalkSchedulerService {
 
     private RestTemplate restTemplate;
+    private Environment environment;
 
     @Autowired
-    public LightningTalkSchedulerService(RestTemplate restTemplate) {
+    public LightningTalkSchedulerService(RestTemplate restTemplate, Environment environment) {
         this.restTemplate = restTemplate;
+        this.environment = environment;
     }
 
     public boolean schedule() {
@@ -38,7 +41,7 @@ public class LightningTalkSchedulerService {
         String formattedStartTime = dateTimeFormatterTime.format(startDate);
         String formattedEndTime = dateTimeFormatterTime.format(endDate);
 
-        var recipient = "ivo.batistela@db1.com.br";
+        var recipient = getBroadcastEmailAddress();
         var content = "Solicito a transmissão da Lightning Talk \"" + ltTitle + "\", que ocorrerá no dia " + formattedStartDate + " das " + formattedStartTime + " até " + formattedEndTime;
         var transmissionEmailRequestBody = new TransmissionEmailRequestBody(recipient, ltTitle, content);
 
@@ -46,5 +49,9 @@ public class LightningTalkSchedulerService {
         ResponseEntity<String> sendEmailResponse = restTemplate.postForEntity("https://graph.microsoft.com/v1.0/me/sendMail", request, String.class);
 
         return sendEmailResponse.getStatusCode() == HttpStatus.ACCEPTED;
+    }
+
+    private String getBroadcastEmailAddress() {
+        return environment.getProperty("broadcast.email.address");
     }
 }
