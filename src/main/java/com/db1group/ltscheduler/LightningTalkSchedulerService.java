@@ -19,9 +19,8 @@ public class LightningTalkSchedulerService {
     private Environment environment;
 
     @Autowired
-    public LightningTalkSchedulerService(RestTemplate restTemplate, Environment environment) {
+    public LightningTalkSchedulerService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-        this.environment = environment;
     }
 
     public boolean schedule() {
