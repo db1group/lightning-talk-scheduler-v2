@@ -1,10 +1,12 @@
 package com.db1group.ltscheduler;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -19,13 +21,23 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 class LightningTalkSchedulerServiceTest {
 
+    private static final String SCHEDULER_EMAIL_ADDRESS_EMAIL_TO = "scheduler.emailAddress.emailTo";
     private static final String URL_SEND_MAIL = "https://graph.microsoft.com/v1.0/me/sendMail";
+    private static final String EMAIL_TO_SEND = "helpdesk@db1.com.br";
 
     @Mock
     private RestTemplate restTemplateMock;
 
+    @Mock
+    private Environment environment;
+
     @InjectMocks
     private LightningTalkSchedulerService lightningTalkSchedulerService;
+
+    @BeforeEach
+    public void before() {
+        when(environment.getProperty(SCHEDULER_EMAIL_ADDRESS_EMAIL_TO)).thenReturn(EMAIL_TO_SEND);
+    }
 
     @Test
     public void shouldTestUrl_forPostEntity() {
@@ -65,7 +77,7 @@ class LightningTalkSchedulerServiceTest {
                 "    \"toRecipients\": [\n" +
                 "      {\n" +
                 "        \"emailAddress\": {\n" +
-                "          \"address\": \"helpdesk@db1.com.br\"\n" +
+                "          \"address\": \"" + EMAIL_TO_SEND + "\"\n" +
                 "        }\n" +
                 "      }\n" +
                 "    ]\n" +

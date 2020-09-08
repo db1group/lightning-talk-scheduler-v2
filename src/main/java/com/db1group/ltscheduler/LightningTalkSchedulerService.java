@@ -1,6 +1,7 @@
 package com.db1group.ltscheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,11 +15,16 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class LightningTalkSchedulerService {
 
+    private static final String SCHEDULER_EMAIL_ADDRESS_EMAIL_TO = "scheduler.emailAddress.emailTo";
+
     private RestTemplate restTemplate;
 
+    private Environment environment;
+
     @Autowired
-    public LightningTalkSchedulerService(RestTemplate restTemplate) {
+    public LightningTalkSchedulerService(RestTemplate restTemplate, Environment environment) {
         this.restTemplate = restTemplate;
+        this.environment = environment;
     }
 
     public boolean schedule() {
@@ -32,7 +38,7 @@ public class LightningTalkSchedulerService {
         headers.add("Authorization", "Bearer TOKEN");
         headers.add("Content-type", "application/json");
 
-        String body = getBody(ltTitle, startDate, endDate);
+        String body = getBody(ltTitle, startDate, endDate, getEmailAddressToSend());
 
         var request = new HttpEntity<String>(body, headers);
         ResponseEntity<String> sendEmailResponse = restTemplate.postForEntity("https://graph.microsoft.com/v1.0/me/sendMail", request, String.class);
@@ -40,7 +46,7 @@ public class LightningTalkSchedulerService {
         return sendEmailResponse.getStatusCode() == HttpStatus.ACCEPTED;
     }
 
-    private String getBody(String ltTitle, LocalDateTime startDate, LocalDateTime endDate) {
+    private String getBody(String ltTitle, LocalDateTime startDate, LocalDateTime endDate, String emailAddressToSend) {
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter dateTimeFormatterTime = DateTimeFormatter.ofPattern("HH:mm");
@@ -58,12 +64,16 @@ public class LightningTalkSchedulerService {
                 "    \"toRecipients\": [\n" +
                 "      {\n" +
                 "        \"emailAddress\": {\n" +
-                "          \"address\": \"helpdesk@db1.com.br\"\n" +
+                "          \"address\": \"" + emailAddressToSend + "\"\n" +
                 "        }\n" +
                 "      }\n" +
                 "    ]\n" +
                 "  },\n" +
                 "  \"saveToSentItems\": \"true\"\n" +
                 "}";
+    }
+
+    private String getEmailAddressToSend() {
+        return environment.getProperty(SCHEDULER_EMAIL_ADDRESS_EMAIL_TO);
     }
 }
