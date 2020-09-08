@@ -23,25 +23,9 @@ public class LightningTalkSchedulerService {
         headers.add("Authorization", "Bearer TOKEN");
         headers.add("Content-type", "application/json");
 
-        String body = "{\n" +
-                "  \"message\": {\n" +
-                "    \"subject\": \"Meet for lunch?\",\n" +
-                "    \"body\": {\n" +
-                "      \"contentType\": \"Text\",\n" +
-                "      \"content\": \"The new cafeteria is open.\"\n" +
-                "    },\n" +
-                "    \"toRecipients\": [\n" +
-                "      {\n" +
-                "        \"emailAddress\": {\n" +
-                "          \"address\": \"ivo.batistela@db1.com.br\"\n" +
-                "        }\n" +
-                "      }\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  \"saveToSentItems\": \"true\"\n" +
-                "}";
+        var transmissionEmailRequestBody = new TransmissionEmailRequestBody("ivo.batistela@db1.com.br", "Meet for lunch?", "The new cafeteria is open.");
 
-        var request = new HttpEntity<String>(body, headers);
+        var request = new HttpEntity<TransmissionEmailRequestBody>(transmissionEmailRequestBody, headers);
         ResponseEntity<String> sendEmailResponse = restTemplate.postForEntity("https://graph.microsoft.com/v1.0/me/sendMail", request, String.class);
 
         return sendEmailResponse.getStatusCode() == HttpStatus.ACCEPTED;

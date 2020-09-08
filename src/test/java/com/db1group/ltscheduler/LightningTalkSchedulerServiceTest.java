@@ -1,24 +1,24 @@
 package com.db1group.ltscheduler;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class LightningTalkSchedulerServiceTest {
-
 
     private static final String URL_SEND_MAIL = "https://graph.microsoft.com/v1.0/me/sendMail";
 
@@ -48,29 +48,9 @@ class LightningTalkSchedulerServiceTest {
         verify(restTemplateMock).postForEntity(eq(URL_SEND_MAIL), requestCaptor.capture(), any());
         HttpEntity capture = requestCaptor.getValue();
 
+        TransmissionEmailRequestBody expectedRequestBody = new TransmissionEmailRequestBody("ivo.batistela@db1.com.br", "Meet for lunch?", "The new cafeteria is open.");
         Object body = capture.getBody();
         assertNotNull(body);
-        assertEquals(getExpectedBody(), body.toString());
+        assertEquals(expectedRequestBody, body);
     }
-
-    private Object getExpectedBody() {
-        return "{\n" +
-                "  \"message\": {\n" +
-                "    \"subject\": \"Meet for lunch?\",\n" +
-                "    \"body\": {\n" +
-                "      \"contentType\": \"Text\",\n" +
-                "      \"content\": \"The new cafeteria is open.\"\n" +
-                "    },\n" +
-                "    \"toRecipients\": [\n" +
-                "      {\n" +
-                "        \"emailAddress\": {\n" +
-                "          \"address\": \"ivo.batistela@db1.com.br\"\n" +
-                "        }\n" +
-                "      }\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  \"saveToSentItems\": \"true\"\n" +
-                "}";
-    }
-
 }
