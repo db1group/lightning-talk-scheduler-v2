@@ -1,14 +1,10 @@
 package com.db1group.ltscheduler;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -23,7 +19,8 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 class LightningTalkSchedulerServiceTest {
 
-    private static final String URL_SEND_MAIL = "https://graph.microsoft.com/v1.0/me/sendMail";
+    private static final String TRANSMISSION_EMAIL_URL = "https://graph.microsoft.com/v1.0/me/sendMail";
+    private static final String SCHEDULING_EMAIL_URL = "https://graph.microsoft.com/v1.0/me/calendar/events";
 
     @MockBean
     private RestTemplate restTemplateMock;
@@ -37,7 +34,7 @@ class LightningTalkSchedulerServiceTest {
 
         lightningTalkSchedulerService.schedule();
 
-        verify(restTemplateMock).postForEntity(eq(URL_SEND_MAIL), any(), any());
+        verify(restTemplateMock).postForEntity(eq(TRANSMISSION_EMAIL_URL), any(), any());
     }
 
     @Test
@@ -48,15 +45,9 @@ class LightningTalkSchedulerServiceTest {
         LocalDateTime endDate = LocalDateTime.of(2020, 03, 25, 15, 30, 0);
         lightningTalkSchedulerService.schedule("Refatorando seu código", startDate, endDate);
 
-        ArgumentCaptor<HttpEntity> requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
-
-        verify(restTemplateMock).postForEntity(eq(URL_SEND_MAIL), requestCaptor.capture(), any());
-        HttpEntity capture = requestCaptor.getValue();
-
         TransmissionEmailRequestBody expectedRequestBody = new TransmissionEmailRequestBody("email.at.application.properties@mail.com", "Refatorando seu código", "Solicito a transmissão da Lightning Talk \"Refatorando seu código\", que ocorrerá no dia 25/03/2020 das 15:00 até 15:30");
-        Object body = capture.getBody();
-        assertNotNull(body);
-        assertEquals(expectedRequestBody, body);
+
+        assertEquals(expectedRequestBody, captureSentBody(TRANSMISSION_EMAIL_URL));
     }
 
     @Test
@@ -67,14 +58,50 @@ class LightningTalkSchedulerServiceTest {
         LocalDateTime endDate = LocalDateTime.of(2020, 03, 25, 15, 30, 0);
         lightningTalkSchedulerService.schedule("Refatorando seu código", startDate, endDate);
 
+        Object body = captureSentBody(TRANSMISSION_EMAIL_URL);
+        assertTrue(String.valueOf(body).contains("email.at.application.properties@mail.com"));
+    }
+
+    @Test
+    public void whenSchedulingTheLightningTalkOnPeopleCalendar_ShouldSendToRightUrl() {
+        when(restTemplateMock.postForEntity(anyString(), any(HttpEntity.class), eq(String.class))).thenReturn(ResponseEntity.accepted().build());
+
+        lightningTalkSchedulerService.schedule();
+
+        verify(restTemplateMock).postForEntity(eq(SCHEDULING_EMAIL_URL), any(), any());
+    }
+
+    @Test
+    public void shouldTestBody_forSchedulingLightingTalkPeopleCalendarRequest() {
+        when(restTemplateMock.postForEntity(anyString(), any(HttpEntity.class), eq(String.class))).thenReturn(ResponseEntity.accepted().build());
+
+        LocalDateTime startDate = LocalDateTime.of(2020, 03, 25, 15, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(2020, 03, 25, 15, 30, 0);
+        lightningTalkSchedulerService.schedule("Refatorando seu código", startDate, endDate);
+
+        SchedulingEmailRequestBody expectedRequestBody = new SchedulingEmailRequestBody("LT: Refatorando seu código", startDate, endDate, "Grande LightTalk sobre refatoração de código", "talk@db1.com.br");
+
+        assertEquals(expectedRequestBody, captureSentBody(SCHEDULING_EMAIL_URL));
+    }
+
+    private Object captureSentBody(String toUri) {
         ArgumentCaptor<HttpEntity> requestCaptor = ArgumentCaptor.forClass(HttpEntity.class);
 
-        verify(restTemplateMock).postForEntity(eq(URL_SEND_MAIL), requestCaptor.capture(), any());
+        verify(restTemplateMock).postForEntity(eq(toUri), requestCaptor.capture(), any());
         HttpEntity capture = requestCaptor.getValue();
 
-        Object body = capture.getBody();
-        assertNotNull(body);
+        return capture.getBody();
+    }
 
-        assertTrue(String.valueOf(body).contains("email.at.application.properties@mail.com"));
+    @Test
+    public void shouldScheduleTheLightningTalkIntoTheConfiguredCalendar() {
+        when(restTemplateMock.postForEntity(anyString(), any(HttpEntity.class), eq(String.class))).thenReturn(ResponseEntity.accepted().build());
+
+        LocalDateTime startDate = LocalDateTime.of(2020, 03, 25, 15, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(2020, 03, 25, 15, 30, 0);
+        lightningTalkSchedulerService.schedule("Refatorando seu código", startDate, endDate);
+
+        Object body = captureSentBody(SCHEDULING_EMAIL_URL);
+        assertTrue(String.valueOf(body).contains("scheduling.email.at.application.properties@mail.com"));
     }
 }
