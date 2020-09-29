@@ -79,7 +79,7 @@ class LightningTalkSchedulerServiceTest {
         LocalDateTime endDate = LocalDateTime.of(2020, 03, 25, 15, 30, 0);
         lightningTalkSchedulerService.schedule("Refatorando seu código", startDate, endDate);
 
-        SchedulingEmailRequestBody expectedRequestBody = new SchedulingEmailRequestBody("LT: Refatorando seu código", startDate, endDate, "Grande LightTalk sobre refatoração de código", "talk@db1.com.br");
+        SchedulingEmailRequestBody expectedRequestBody = new SchedulingEmailRequestBody("LT: Refatorando seu código", startDate, endDate, "Grande LightTalk sobre refatoração de código", "scheduling.email.at.application.properties@mail.com");
 
         assertEquals(expectedRequestBody, captureSentBody(SCHEDULING_EMAIL_URL));
     }
